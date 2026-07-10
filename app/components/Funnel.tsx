@@ -1,21 +1,26 @@
 // The signature element. A proportional-band funnel — recruiting IS a funnel,
 // and no generic dashboard renders it as one. Widths are proportional to
 // stage counts; conversion rate between adjacent stages is annotated as an
-// eyebrow rate on the inside of the slope, so the shape and the numbers
+// eyebrow rate on the outside of the slope, so the shape and the numbers
 // carry the same story.
+//
+// Stage labels sit in a fixed left gutter with a hairline leader to the band
+// so labels never collide with narrow bottom bands. Counts stay inside the
+// band, right-aligned.
 
 type Stage = { stage: string; count: number };
 
 export function Funnel({ data }: { data: Stage[] }) {
   const width = 780;
   const height = 260;
-  const gap = 8; // vertical gap between bands
-  const paddingX = 40;
-  const usableW = width - paddingX * 2;
+  const gap = 8;
+  const gutter = 120;                    // fixed column on the left for the stage label
+  const paddingRight = 100;              // space on the right for the % annotation
+  const bandArea = { x: gutter + 20, w: width - gutter - 20 - paddingRight };
   const bandH = (height - gap * (data.length - 1)) / data.length;
 
   const max = data[0].count;
-  const widths = data.map((d) => Math.max(48, (d.count / max) * usableW));
+  const widths = data.map((d) => Math.max(56, (d.count / max) * bandArea.w));
 
   return (
     <figure className="card p-6">
@@ -52,24 +57,51 @@ export function Funnel({ data }: { data: Stage[] }) {
           {data.map((d, i) => {
             const y = i * (bandH + gap);
             const w = widths[i];
-            const x = (width - w) / 2;
+            // Left-align bands to a common inner-left edge so the funnel reads as
+            // a nested shape rather than a centred one — keeps the label leader
+            // line short and consistent.
+            const x = bandArea.x;
             const conv =
               i > 0 ? Math.round((data[i].count / data[i - 1].count) * 100) : null;
 
             return (
               <g key={d.stage} className="flow-in" style={{ animationDelay: `${i * 60}ms` }}>
-                {/* connecting trapezoid from previous band */}
+                {/* connecting trapezoid from previous band's right edge to this one */}
                 {i > 0 && (
                   <path
                     d={
-                      `M ${(width - widths[i - 1]) / 2} ${i * (bandH + gap) - gap}` +
-                      ` L ${(width + widths[i - 1]) / 2} ${i * (bandH + gap) - gap}` +
+                      `M ${bandArea.x} ${y - gap}` +
+                      ` L ${bandArea.x + widths[i - 1]} ${y - gap}` +
                       ` L ${x + w} ${y}` +
                       ` L ${x} ${y} Z`
                     }
                     fill="url(#funnel-fill)"
                   />
                 )}
+
+                {/* leader line from label gutter to band */}
+                <line
+                  x1={gutter - 2}
+                  x2={bandArea.x - 4}
+                  y1={y + bandH / 2}
+                  y2={y + bandH / 2}
+                  stroke="#e6e3ea"
+                />
+
+                {/* stage label — always in the left gutter, never crowded */}
+                <text
+                  x={gutter - 10}
+                  y={y + bandH / 2}
+                  textAnchor="end"
+                  fontFamily="var(--font-sans)"
+                  fontSize="13"
+                  fontWeight="500"
+                  fill="#1c1723"
+                  dominantBaseline="middle"
+                >
+                  {d.stage}
+                </text>
+
                 {/* the band itself */}
                 <rect
                   x={x}
@@ -80,24 +112,12 @@ export function Funnel({ data }: { data: Stage[] }) {
                   fill="#ffffff"
                   stroke="#ece9ef"
                 />
-                {/* accent bar on the left of the band */}
                 <rect x={x} y={y} width="3" height={bandH} rx="1.5" fill="#5b4ce0" />
-                {/* stage label */}
+
+                {/* count — right-aligned inside the band */}
                 <text
-                  x={x + 14}
-                  y={y + bandH / 2 - 2}
-                  fontFamily="var(--font-sans)"
-                  fontSize="13"
-                  fontWeight="500"
-                  fill="#1c1723"
-                  dominantBaseline="middle"
-                >
-                  {d.stage}
-                </text>
-                {/* count */}
-                <text
-                  x={x + w - 14}
-                  y={y + bandH / 2 - 2}
+                  x={x + w - 12}
+                  y={y + bandH / 2 - 1}
                   textAnchor="end"
                   fontFamily="var(--font-display)"
                   fontSize="22"
@@ -108,6 +128,7 @@ export function Funnel({ data }: { data: Stage[] }) {
                 >
                   {d.count}
                 </text>
+
                 {/* conversion tag to the right of the funnel */}
                 {conv !== null && (
                   <g>
