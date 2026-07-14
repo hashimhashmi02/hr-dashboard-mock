@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
-const display = Fraunces({
-  subsets: ["latin"],
-  axes: ["opsz"],
-  variable: "--font-display",
-  display: "swap",
-});
 
 const sans = Inter({
   subsets: ["latin"],
@@ -15,21 +8,20 @@ const sans = Inter({
   display: "swap",
 });
 
-const mono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
   variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "HR Dashboard",
-  description: "AI-powered hiring & onboarding, in one calm surface.",
+  description: "Modern hiring & onboarding.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="bg-canvas font-sans text-ink-900 antialiased">{children}</body>
     </html>
   );

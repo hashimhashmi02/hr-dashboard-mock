@@ -3,105 +3,83 @@ import { Icon } from "../components/Icons";
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_1fr]">
-      {/* ── Editorial column ───────────────────────────────────────────── */}
-      <section className="relative hidden flex-col justify-between overflow-hidden bg-ink-900 px-14 py-14 text-canvas lg:flex">
-        {/* soft iris orb behind */}
-        <div
-          className="pointer-events-none absolute -left-40 top-1/3 h-[560px] w-[560px] rounded-full opacity-40 blur-3xl"
-          style={{ background: "radial-gradient(circle, #5b4ce0 0%, transparent 60%)" }}
-          aria-hidden
-        />
-        <div className="relative flex items-center gap-2.5">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-canvas">
-            <span className="font-display text-[15px] font-medium leading-none text-ink-900">H</span>
+    <div className="grid min-h-screen place-items-center bg-canvas px-6 py-10">
+      <div className="w-full max-w-[380px]">
+        <div className="mb-8 flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-md bg-ink-900 text-sm font-semibold text-white">
+            HR
           </div>
-          <span className="font-display text-[19px] font-medium tracking-tight">HR Dashboard</span>
+          <span className="text-base font-semibold tracking-tight text-ink-900">
+            Zuvomo Hiring
+          </span>
         </div>
 
-        <div className="relative max-w-xl">
-          <h1 className="font-display text-[54px] font-medium leading-[1.02] tracking-[-0.02em]">
-            The instrument for
-            <br />
-            <em className="text-iris/90" style={{ fontStyle: "italic" }}>
-              deliberate hiring
-            </em>
-            .
-          </h1>
-          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-canvas/70">
-            Every hire has a story: how they arrived, who spoke with them, what was
-            decided. No dashboards for their own sake — one calm surface where the work
-            moves forward.
-          </p>
-        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Sign in</h1>
+        <p className="mt-1 text-sm text-ink-500">
+          Enter your credentials to continue.
+        </p>
 
-        <div className="relative flex items-end justify-between text-[12px] text-canvas/50">
-          <div>
-            <div className="eyebrow mb-1 text-canvas/40">In this build</div>
-            <div>Roles · People · Interviews · Overview</div>
-          </div>
-          <div className="font-mono">v0.4 · demo</div>
-        </div>
-      </section>
-
-      {/* ── Form column ────────────────────────────────────────────────── */}
-      <section className="flex items-center justify-center px-6 py-14 md:px-14">
-        <div className="w-full max-w-sm">
-          <div className="eyebrow mb-2.5">Sign in</div>
-          <h2 className="font-display text-[34px] font-medium leading-tight tracking-tight text-ink-900">
-            Welcome back.
-          </h2>
-          <p className="mt-1.5 text-[14px] text-ink-500">
-            Continue to the hiring dashboard.
-          </p>
-
-          <form className="mt-9 space-y-5">
-            <label className="block">
-              <span className="eyebrow mb-1.5 block">Work email</span>
-              <input
-                type="email"
-                defaultValue="recruiter@company.com"
-                className="w-full rounded-lg border border-ink-200 bg-white px-3.5 py-2.5 text-[14px] outline-none transition focus:border-iris focus:shadow-[0_0_0_3px_rgba(91,76,224,0.12)]"
-              />
-            </label>
-            <label className="block">
-              <div className="mb-1.5 flex items-baseline justify-between">
-                <span className="eyebrow">Password</span>
-                <a href="#" className="text-[11.5px] text-iris-ink hover:underline">
-                  Forgot?
-                </a>
-              </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full rounded-lg border border-ink-200 bg-white px-3.5 py-2.5 text-[14px] outline-none transition focus:border-iris focus:shadow-[0_0_0_3px_rgba(91,76,224,0.12)]"
-              />
-            </label>
-
-            <Link
-              href="/dashboard"
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-ink-900 py-3 text-[13.5px] font-medium text-canvas transition hover:bg-iris-ink"
-            >
-              Sign in
-              <Icon.ArrowRight size={14} />
-            </Link>
-          </form>
-
-          <div className="mt-8 rounded-xl border border-ink-200 bg-white/60 p-4">
-            <div className="eyebrow mb-2">For reviewers</div>
-            <div className="space-y-1 font-mono text-[12px] text-ink-500">
-              <div>
-                <span className="text-ink-900">recruiter@company.com</span>
-                <span className="mx-1.5 text-ink-400">·</span>recruiter123
-              </div>
-              <div>
-                <span className="text-ink-900">manager@company.com</span>
-                <span className="mx-1.5 text-ink-400">·</span>manager123
-              </div>
+        <form className="mt-8 space-y-4">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-ink-800">Work email</span>
+            <input
+              type="email"
+              defaultValue="recruiter@company.com"
+              className="w-full rounded-md border border-ink-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:shadow-focus"
+            />
+          </label>
+          <label className="block">
+            <div className="mb-1 flex items-baseline justify-between">
+              <span className="text-sm font-medium text-ink-800">Password</span>
+              <a href="#" className="text-xs text-brand-600 hover:underline">
+                Forgot password?
+              </a>
             </div>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="w-full rounded-md border border-ink-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:shadow-focus"
+            />
+          </label>
+
+          <Link
+            href="/dashboard"
+            className="flex w-full items-center justify-center gap-1.5 rounded-md bg-ink-900 py-2 text-sm font-medium text-white transition hover:bg-ink-800"
+          >
+            Sign in
+            <Icon.ArrowRight size={13} />
+          </Link>
+
+          <button
+            type="button"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-ink-200 bg-white py-2 text-sm font-medium text-ink-900 transition hover:bg-ink-50"
+          >
+            <svg width="14" height="14" viewBox="0 0 20 20" aria-hidden>
+              <path d="M19.6 10.23a11.5 11.5 0 00-.16-1.94H10v3.68h5.4a4.6 4.6 0 01-2 3.02v2.5h3.24c1.9-1.75 3-4.32 3-7.26z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.97-.9 6.62-2.44l-3.24-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.75-5.6-4.1H1.06v2.57A10 10 0 0010 20z" fill="#34A853"/>
+              <path d="M4.4 11.92a6 6 0 010-3.84V5.5H1.06a10 10 0 000 9l3.34-2.58z" fill="#FBBC05"/>
+              <path d="M10 3.96c1.47 0 2.79.5 3.82 1.5l2.87-2.87A10 10 0 001.06 5.5L4.4 8.08c.8-2.35 3-4.12 5.6-4.12z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+        </form>
+
+        <div className="mt-8 rounded-md border border-ink-200 bg-white p-3">
+          <div className="mb-2 flex items-center gap-1.5 text-2xs font-medium uppercase tracking-wider text-ink-500">
+            <Icon.Sparkle size={11} />
+            Demo credentials
+          </div>
+          <div className="space-y-1 font-mono text-xs text-ink-700">
+            <div>recruiter@company.com <span className="text-ink-400">·</span> recruiter123</div>
+            <div>manager@company.com <span className="text-ink-400">·</span> manager123</div>
+            <div>admin@company.com <span className="text-ink-400">·</span> admin123</div>
           </div>
         </div>
-      </section>
+
+        <p className="mt-6 text-center text-xs text-ink-500">
+          By signing in you agree to the <a href="#" className="text-ink-700 hover:underline">Terms</a> and <a href="#" className="text-ink-700 hover:underline">Privacy Policy</a>.
+        </p>
+      </div>
     </div>
   );
 }

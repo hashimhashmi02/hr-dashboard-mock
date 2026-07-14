@@ -2,15 +2,6 @@ import { Shell, StatusPill, Button } from "../components/Shell";
 import { Icon } from "../components/Icons";
 import { candidates } from "../lib/mock-data";
 
-const stageTone: Record<string, "slate" | "iris" | "amber" | "sage" | "rose"> = {
-  Applied: "slate",
-  Shortlisted: "iris",
-  Interview: "amber",
-  Offer: "iris",
-  Hired: "sage",
-  Rejected: "rose",
-};
-
 function initials(name: string) {
   return name
     .split(" ")
@@ -19,178 +10,147 @@ function initials(name: string) {
     .join("");
 }
 
-// Match visualisation: a radial arc from 0..100. More informative than a bar
-// and it plays nicely at the small size the table needs.
-function MatchRing({ value }: { value: number }) {
-  const r = 12;
-  const c = 2 * Math.PI * r;
-  const off = c - (value / 100) * c;
-  const color = value >= 85 ? "#3f7357" : value >= 70 ? "#976a1a" : "#9c4560";
-  return (
-    <div className="flex items-center gap-2">
-      <svg width="30" height="30" viewBox="0 0 30 30">
-        <circle cx="15" cy="15" r={r} fill="none" stroke="#efedf1" strokeWidth="3" />
-        <circle
-          cx="15"
-          cy="15"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="3"
-          strokeDasharray={c}
-          strokeDashoffset={off}
-          strokeLinecap="round"
-          transform="rotate(-90 15 15)"
-        />
-      </svg>
-      <span className="metric text-[15px] text-ink-900">{value}</span>
-    </div>
-  );
-}
+const stages = [
+  { key: "Applied", tone: "slate" as const },
+  { key: "Shortlisted", tone: "sky" as const },
+  { key: "Interview", tone: "amber" as const },
+  { key: "Offer", tone: "violet" as const },
+  { key: "Hired", tone: "emerald" as const },
+];
 
-// Stage counts — displayed as a compact tab strip at the top
-function StageStrip() {
-  const counts: [string, number, string][] = [
-    ["All", 200, "slate"],
-    ["Applied", 87, "slate"],
-    ["Shortlisted", 42, "iris"],
-    ["Interview", 41, "amber"],
-    ["Offer", 18, "iris"],
-    ["Hired", 11, "sage"],
-    ["Rejected", 1, "rose"],
-  ];
-  return (
-    <div className="mb-6 flex flex-wrap items-center gap-1 rounded-full border border-ink-200 bg-white p-1">
-      {counts.map(([label, count, tone], i) => (
-        <button
-          key={label}
-          className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] transition ${
-            i === 0
-              ? "bg-ink-900 text-canvas"
-              : "text-ink-500 hover:bg-canvas hover:text-ink-900"
-          }`}
-        >
-          <span>{label}</span>
-          <span
-            className={`font-mono text-[10.5px] ${
-              i === 0 ? "text-canvas/70" : "text-ink-400"
-            }`}
-          >
-            {count}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
+// Fill each stage with a distributed set of the candidates so the kanban
+// board actually has content in every column. In prod this would come from
+// the DB grouped by stage.
+function distribute() {
+  const buckets: Record<string, typeof candidates> = {};
+  stages.forEach((s) => (buckets[s.key] = []));
+  candidates.forEach((c, i) => {
+    // Preserve the candidate's real stage if it lines up with the columns
+    if (buckets[c.stage]) {
+      buckets[c.stage].push(c);
+    } else {
+      // Otherwise round-robin across columns for a fuller demo
+      buckets[stages[i % stages.length].key].push(c);
+    }
+  });
+  return buckets;
 }
 
 export default function CandidatesPage() {
+  const buckets = distribute();
+
   return (
     <Shell
-      eyebrow="Workspace"
-      title="People"
-      lede="200 applicants moving through open roles. Filter, review, decide."
+      title="Candidates"
+      breadcrumb="Recruiting"
+      tabs={[
+        { label: "Board", href: "#", active: true },
+        { label: "List", href: "#" },
+        { label: "Recommendations", href: "#" },
+      ]}
       action={
         <>
-          <Button variant="ghost">
-            <Icon.Filter size={13} /> Filters · 2
+          <Button variant="ghost" size="sm">
+            <Icon.Filter size={12} /> Filter · 2
           </Button>
-          <Button variant="primary">
-            <Icon.Plus size={13} /> Add candidate
+          <Button variant="primary" size="sm">
+            <Icon.Plus size={12} /> Add candidate
           </Button>
         </>
       }
     >
-      <StageStrip />
-
-      {/* Compact toolbar */}
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 rounded-lg border border-ink-200 bg-white px-3 py-2">
-          <Icon.Search size={14} className="text-ink-400" />
+      {/* Compact filter row */}
+      <div className="mb-4 flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 rounded-md border border-ink-200 bg-white px-3 py-1.5">
+          <Icon.Search size={13} className="text-ink-400" />
           <input
-            placeholder="Search by name, email, skill…"
-            className="min-w-[180px] flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-ink-400"
+            placeholder="Search by name, email, or skill"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-ink-400"
           />
         </div>
-        <div className="hidden items-center gap-4 text-[12px] text-ink-400 md:flex">
-          <span>
-            <span className="text-ink-900">200</span> candidates
-          </span>
-          <span>·</span>
-          <span>
-            avg match <span className="text-ink-900">84</span>
-          </span>
-        </div>
+        <select className="rounded-md border border-ink-200 bg-white px-2.5 py-1.5 text-sm text-ink-700">
+          <option>All jobs</option>
+          <option>Machine Learning Engineer</option>
+          <option>Senior Backend Engineer</option>
+        </select>
+        <select className="rounded-md border border-ink-200 bg-white px-2.5 py-1.5 text-sm text-ink-700">
+          <option>All sources</option>
+          <option>LinkedIn</option>
+          <option>Referral</option>
+        </select>
       </div>
 
-      {/* Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-ink-100 bg-raise">
-                {["Candidate", "Applied for", "Stage", "Match", "Experience", "Source", "Applied"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3 text-left font-mono text-[10.5px] font-medium uppercase tracking-label text-ink-500"
+      {/* Kanban board */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        {stages.map((s) => {
+          const cards = buckets[s.key];
+          return (
+            <div key={s.key} className="flex flex-col rounded-lg border border-ink-200 bg-white">
+              <div className="flex items-center justify-between border-b border-ink-100 px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  <StatusPill tone={s.tone}>{s.key}</StatusPill>
+                  <span className="tabular text-xs text-ink-500">{cards.length}</span>
+                </div>
+                <button className="text-ink-400 hover:text-ink-900">
+                  <Icon.Plus size={13} />
+                </button>
+              </div>
+
+              <div className="max-h-[560px] space-y-2 overflow-y-auto p-2">
+                {cards.slice(0, 5).map((c) => (
+                  <article
+                    key={c.id}
+                    className="cursor-grab rounded-md border border-ink-200 bg-white p-3 shadow-card transition hover:border-brand-500 hover:shadow-lift"
                   >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {candidates.map((c) => (
-                <tr
-                  key={c.id}
-                  className="border-b border-ink-100 transition last:border-0 hover:bg-raise"
-                >
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-canvas font-mono text-[11px] font-medium text-ink-700">
+                    <div className="flex items-center gap-2">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-100 text-2xs font-semibold text-ink-700">
                         {initials(c.name)}
                       </span>
-                      <div>
-                        <div className="text-[13.5px] font-medium text-ink-900">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium text-ink-900">
                           {c.name}
                         </div>
-                        <div className="text-[11.5px] text-ink-400">{c.email}</div>
+                        <div className="truncate text-2xs text-ink-500">
+                          {c.role}
+                        </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-ink-700">{c.role}</td>
-                  <td className="px-5 py-3.5">
-                    <StatusPill tone={stageTone[c.stage]}>{c.stage}</StatusPill>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <MatchRing value={c.match} />
-                  </td>
-                  <td className="px-5 py-3.5 text-ink-700">{c.experience}</td>
-                  <td className="px-5 py-3.5 text-ink-500">{c.source}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11.5px] text-ink-400">
-                    {c.applied}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Footer meta */}
-      <div className="mt-4 flex items-center justify-between text-[12px] text-ink-400">
-        <span>
-          Showing <span className="text-ink-900">1–{candidates.length}</span> of{" "}
-          <span className="text-ink-900">200</span>
-        </span>
-        <div className="flex items-center gap-2">
-          <button className="rounded-md border border-ink-200 bg-white px-2.5 py-1 hover:text-ink-900">
-            Prev
-          </button>
-          <button className="rounded-md border border-ink-200 bg-white px-2.5 py-1 text-ink-900">
-            Next
-          </button>
-        </div>
+                    <div className="mt-2.5 flex items-center justify-between border-t border-ink-100 pt-2 text-2xs">
+                      <div className="flex items-center gap-1.5 text-ink-500">
+                        <Icon.Sparkle size={10} className="text-brand-600" />
+                        <span className="text-ink-700">{c.experience}</span>
+                        <span className="text-ink-300">·</span>
+                        <span>{c.source}</span>
+                      </div>
+                      <span
+                        className={`tabular rounded px-1.5 py-0.5 font-medium ${
+                          c.match >= 85
+                            ? "bg-emerald-bg text-emerald-fg"
+                            : c.match >= 70
+                              ? "bg-amber-bg text-amber-fg"
+                              : "bg-rose-bg text-rose-fg"
+                        }`}
+                      >
+                        {c.match}%
+                      </span>
+                    </div>
+                  </article>
+                ))}
+                {cards.length === 0 && (
+                  <div className="grid place-items-center py-6 text-xs text-ink-400">
+                    Nothing here yet
+                  </div>
+                )}
+                {cards.length > 5 && (
+                  <button className="w-full py-2 text-xs font-medium text-brand-600 hover:underline">
+                    Show {cards.length - 5} more →
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </Shell>
   );

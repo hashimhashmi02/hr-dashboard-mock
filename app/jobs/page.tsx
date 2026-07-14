@@ -2,137 +2,126 @@ import { Shell, StatusPill, Button } from "../components/Shell";
 import { Icon } from "../components/Icons";
 import { jobs } from "../lib/mock-data";
 
-const statusTone: Record<string, "sage" | "slate" | "rose"> = {
-  Published: "sage",
+const statusTone: Record<string, "emerald" | "slate" | "rose"> = {
+  Published: "emerald",
   Draft: "slate",
   Closed: "rose",
 };
 
-// tiny inline sparkline — signals applicant volume trend per job
-function Spark({ seed }: { seed: number }) {
-  const pts = Array.from({ length: 12 }, (_, i) => {
-    const v =
-      12 +
-      6 * Math.sin(seed + i * 0.9) +
-      3 * Math.cos(seed * 1.4 + i * 0.4);
-    return `${(i / 11) * 60},${20 - v * 0.8}`;
-  }).join(" ");
-  return (
-    <svg viewBox="0 0 60 24" width="72" height="22" aria-hidden>
-      <polyline
-        points={pts}
-        fill="none"
-        stroke="#5b4ce0"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx={pts.split(" ").pop()?.split(",")[0]}
-        cy={pts.split(" ").pop()?.split(",")[1]}
-        r="2"
-        fill="#5b4ce0"
-      />
-    </svg>
-  );
-}
-
 export default function JobsPage() {
   return (
     <Shell
-      eyebrow="Workspace"
-      title="Roles"
-      lede="Every open requisition, its current pipeline, and who owns it."
+      title="Jobs"
+      breadcrumb="Recruiting"
+      tabs={[
+        { label: "All", href: "#", active: true, count: jobs.length },
+        { label: "Published", href: "#", count: jobs.filter((j) => j.status === "Published").length },
+        { label: "Draft", href: "#", count: jobs.filter((j) => j.status === "Draft").length },
+        { label: "Closed", href: "#", count: jobs.filter((j) => j.status === "Closed").length },
+      ]}
       action={
         <>
-          <Button variant="ghost">
-            <Icon.Filter size={13} /> All statuses
+          <Button variant="ghost" size="sm">
+            <Icon.Filter size={12} /> Filter
           </Button>
-          <Button variant="primary">
-            <Icon.Plus size={13} /> Open a role
+          <Button variant="primary" size="sm">
+            <Icon.Plus size={12} /> Create job
           </Button>
         </>
       }
     >
-      {/* Compact filter row — feels like a search bar in a serious editor */}
-      <div className="card mb-6 flex flex-wrap items-center gap-3 p-3">
-        <div className="flex flex-1 items-center gap-2 rounded-lg bg-canvas px-3 py-2">
-          <Icon.Search size={14} className="text-ink-400" />
+      {/* Search bar */}
+      <div className="mb-3 flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 rounded-md border border-ink-200 bg-white px-3 py-1.5">
+          <Icon.Search size={13} className="text-ink-400" />
           <input
-            placeholder="Search roles, departments, requirements…"
-            className="min-w-[180px] flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-ink-400"
+            placeholder="Search by title, department, or hiring manager"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-ink-400"
           />
-          <kbd className="rounded border border-ink-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-ink-500">
-            /
-          </kbd>
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-ink-500">
-          <span className="eyebrow">Sort</span>
-          <select className="rounded-lg border border-ink-200 bg-white px-2 py-1.5 text-[12.5px] text-ink-700 outline-none">
-            <option>Newest</option>
-            <option>Most candidates</option>
-            <option>Time open</option>
-          </select>
+        <select className="rounded-md border border-ink-200 bg-white px-2.5 py-1.5 text-sm text-ink-700">
+          <option>Sort: Newest</option>
+          <option>Most candidates</option>
+          <option>Time open</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-hidden rounded-lg border border-ink-200 bg-white">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-ink-200 bg-raise text-left">
+                <th className="w-10 px-3 py-2">
+                  <input type="checkbox" className="rounded border-ink-300" />
+                </th>
+                {["Role", "Department", "Location", "Type", "Status", "Applicants", "Openings", "Posted"].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className={`px-3 py-2 text-xs font-medium text-ink-500 ${
+                        h === "Applicants" || h === "Openings" ? "text-right" : ""
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  )
+                )}
+                <th className="w-10 px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {jobs.map((job) => (
+                <tr
+                  key={job.id}
+                  className="border-b border-ink-100 last:border-0 hover:bg-raise"
+                >
+                  <td className="px-3 py-3">
+                    <input type="checkbox" className="rounded border-ink-300" />
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="font-medium text-ink-900">{job.title}</div>
+                  </td>
+                  <td className="px-3 py-3 text-ink-700">{job.department}</td>
+                  <td className="px-3 py-3 text-ink-700">{job.location}</td>
+                  <td className="px-3 py-3 text-ink-700">{job.type}</td>
+                  <td className="px-3 py-3">
+                    <StatusPill tone={statusTone[job.status]}>{job.status}</StatusPill>
+                  </td>
+                  <td className="tabular px-3 py-3 text-right text-ink-900">
+                    {job.candidates}
+                  </td>
+                  <td className="tabular px-3 py-3 text-right text-ink-900">
+                    {job.openings}
+                  </td>
+                  <td className="tabular whitespace-nowrap px-3 py-3 text-xs text-ink-500">
+                    {job.posted}
+                  </td>
+                  <td className="px-3 py-3">
+                    <button className="text-ink-400 hover:text-ink-900">
+                      <Icon.Chevron size={13} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Group heading — makes the list feel curated, not dumped */}
-      <div className="mb-3 flex items-baseline justify-between">
-        <div className="eyebrow">Active · {jobs.length}</div>
-        <div className="text-[12px] text-ink-400">
-          <span className="text-ink-700">154</span> total applicants this week
+      <div className="mt-3 flex items-center justify-between text-xs text-ink-500">
+        <span>
+          Showing <span className="text-ink-900">1–{jobs.length}</span> of{" "}
+          <span className="text-ink-900">{jobs.length}</span>
+        </span>
+        <div className="flex items-center gap-1">
+          <button className="rounded border border-ink-200 bg-white px-2 py-1 hover:text-ink-900">
+            Prev
+          </button>
+          <button className="rounded border border-ink-200 bg-white px-2 py-1 text-ink-900">
+            Next
+          </button>
         </div>
-      </div>
-
-      {/* Job list — one clean row per role */}
-      <div className="card divide-y divide-ink-100 overflow-hidden">
-        {jobs.map((job, idx) => (
-          <article
-            key={job.id}
-            className="group grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-6 px-5 py-4 transition hover:bg-raise"
-          >
-            {/* index number — feels like a table of contents */}
-            <span className="w-6 font-mono text-[11px] text-ink-400">
-              {String(idx + 1).padStart(2, "0")}
-            </span>
-
-            {/* title + meta */}
-            <div className="min-w-0">
-              <div className="flex items-center gap-2.5">
-                <h3 className="truncate text-[15px] font-medium text-ink-900">
-                  {job.title}
-                </h3>
-                <StatusPill tone={statusTone[job.status]}>{job.status}</StatusPill>
-              </div>
-              <div className="mt-1 flex items-center gap-3 text-[12.5px] text-ink-500">
-                <span>{job.department}</span>
-                <span className="text-ink-200">·</span>
-                <span>{job.location}</span>
-                <span className="text-ink-200">·</span>
-                <span>{job.type}</span>
-                <span className="text-ink-200">·</span>
-                <span>Posted {job.posted}</span>
-              </div>
-            </div>
-
-            {/* sparkline */}
-            <Spark seed={idx * 1.3 + 1} />
-
-            {/* stats */}
-            <div className="text-right">
-              <div className="metric text-[22px] text-ink-900">{job.candidates}</div>
-              <div className="font-mono text-[9.5px] uppercase tracking-label text-ink-400">
-                applicants
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="metric text-[22px] text-iris-ink">{job.openings}</div>
-              <div className="font-mono text-[9.5px] uppercase tracking-label text-ink-400">
-                openings
-              </div>
-            </div>
-          </article>
-        ))}
       </div>
     </Shell>
   );
